@@ -12,7 +12,7 @@ MODULE Lagrange_mod
     ! x		: sample point
     ! xroots	: Interpolation points
     ! L		: i_th Lagrange polynomial
-    ! dl	: derivative of i_th Lagrange polynomial
+    ! dL	: derivative of i_th Lagrange polynomial
     !=======================================================
 
 
