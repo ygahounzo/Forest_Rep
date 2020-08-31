@@ -1,10 +1,22 @@
 Program CG_1D
 
+! Modules
 USE Weight_Leg_Lobat_mod
 USE Lagrange_mod
 USE Matrix_inverse_mod
 
 !IMPLICIT NONE
+!::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+! Np          		: number of global grid points
+! N			: polynomial order
+! Ne			: number of elements
+! u			: velocity
+! M, Me, De		: respectively global mass matrix, element mass matrix, differentiation element matrix
+! Miv			: inverse of global mass matrix
+! w			: weight values
+! R, Re			: global residual vector, element residual vector
+! Xg			: globalgrid points
+!:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 INTEGER						:: i, j, k1, k2,I1, I2, J1, n1
 DOUBLE PRECISION 				:: u = 2.0
@@ -34,11 +46,11 @@ do i = 0, N
    do j = 0, N
       do k = 0, Qd
 
-	 	! call of the basis function 
+	 	! call of the basis function( Lagrange polynomial) 
 
 	 	call Lagrange_deriv(N, i, X(k), xroots,outp1, outp2)
 	 
-     	p = outp1
+     		p = outp1
 	 	call Lagrange_deriv(N, j, X(k), xroots,outp1, outp2)
 
 	 	q1 = outp1
@@ -72,7 +84,7 @@ enddo
 
 CALL weight_LobattoPoints(N, xroots, X1, w1)
 
-! Differentiation matrix at each element
+! Differentiation element matrix
 
 do i = 0, N
    
@@ -99,12 +111,14 @@ enddo
 CALL Matrix_inverse(Np, M, Miv)
 
 ! computation of the global grid points
-
+! spatial stuff
 do i = 0, Np-1
 	Xg(i) = -1.0 + 2.0*i/(Np-1)
 enddo
 
 dx = (bx-ax)/(Np-1)
+
+! time stuff
 dtest = a*dx/abs(u)
 TN = int(Tf/dtest+1.0)
 
@@ -154,7 +168,7 @@ do n1 = 0, TN
 	    	Re(i) = Re(i) -De(i,j)*fo(j)	    
 	    enddo 
 	enddo
-   	fo = 0.0D0   
+   	fo = 0.0D0   ! reinitialisation of the output of the function fe = u*qe to 0
 	
 	! computation of global residual vector
    	do i = 0, N
@@ -164,7 +178,7 @@ do n1 = 0, TN
 	    R(I1) = R(I1) + Re(i)
 	    
     	enddo
-	Re = 0.0D0
+	Re = 0.0D0  ! reinitialisation of the element residual vector to 0
    enddo
 
    !reinitialisation of global residual using inverse mass matrix
@@ -175,7 +189,7 @@ do n1 = 0, TN
        
        enddo
    enddo
-   R = 0.0D0
+   R = 0.0D0  ! reinitialisation of the global residual vector to 0
 
    ! solution of the wave equation at time n+1
 
@@ -183,11 +197,14 @@ do n1 = 0, TN
    
    RG = 0.0D0
    q = 0.0D0
-   CALL qinit_el(ax-u*t(n1+1), el)
+   
+   ! initial conditions
+   CALL qinit_el(ax-u*t(n1+1), el)    	
    qn(0) = el
    CALL qinit_el(bx-u*t(n1+1), el)
    qn(Np-1) = el
    write(1,*) qn
+   
    RG = 0.0D0
    q = 0.0D0
    q = qn
@@ -270,6 +287,5 @@ do i=1,n
 enddo
 
 end subroutine print_matrix
-
 
 end program CG_1D
