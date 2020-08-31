@@ -23,7 +23,7 @@ DOUBLE PRECISION,DIMENSION(0:P+1)             :: Li, dLi, ddLi
 DOUBLE PRECISION,DIMENSION(0:P+1)             :: Bi,dBi
 DOUBLE PRECISION, INTENT(OUT)                 :: outp1, outp2
 
-Li(0) 	= 1.0    		! lengendre polynomial order 0
+Li(0) 	= 1.0D0    		! lengendre polynomial order 0
 dLi(0) 	= 0.0   		! first derivative of lengendre polynomial order 0
 ddLi(0) = 0.0  			! second derivative of lengendre polynomial order 0
 Li(1) 	= x      		! lengendre polynomial order 1
