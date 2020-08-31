@@ -106,7 +106,7 @@ do i = 0, N
    enddo
 enddo
 
-! Inverse matrix of M
+! Inverse matrix of global matrix
 
 CALL Matrix_inverse(Np, M, Miv)
 
