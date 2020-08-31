@@ -29,7 +29,7 @@ MODULE Lagrange_mod
         L =1.0D0
 	dL = 0.0
         DO j=0,N
-	    prod = 1.0
+	    prod = 1.0D0
             IF (i.ne.j) THEN
 
 		L=L*(x-xroots(j))/(xroots(i)-xroots(j))
