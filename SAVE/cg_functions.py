@@ -1,4 +1,6 @@
 
+from numpy import *
+
 def Lobatto_deriv(Q, x):
     F = [] # array containing the polynomials
     dF = []
@@ -14,7 +16,8 @@ def Lobatto_deriv(Q, x):
     B = []
     dB = []
 
-
+# Donna : Comment : You only return B[-1], dB[-1], so why is it necessary to create 
+# list of all Fs, dFs ?  Maybe only store F1, F2, F3 and swap at each iteration
     for i in range(2, Q+1):
         fi = ((2*i-1)/i)*x*F[i-1] - ((i-1)/i)*F[i-2]  # iteration of the polynomials
         dfi = i*F[i-1] + x*dF[i-1]                    # first derivative
@@ -30,6 +33,7 @@ def Lobatto_deriv(Q, x):
         
     return B[-1], dB[-1]
 
+# Donna : Comment : Same comment as above
 def Legendre_deriv(Q, x):
     L = [] # array containing the polynomials
     dL = []
@@ -47,12 +51,16 @@ def Legendre_deriv(Q, x):
         L.append(fi)
         dL.append(dfi)
         
-    return L[-1], dL[-1]
+    return L[-1], dL[-1]  # Donna : Do we need to store all previous values in the list?
 
+# Donna : Set X = empty(Q,1)
 def Lobatto_p(Q):
     X = []  # Array that contains legendre points
     K = 100  # Order of approximation of Newton method
-    e = 10**(-20) #error
+
+    
+    # Donna : This is a tolerance `tol`, not an error;  also, use 1e-20 to store constants. 
+    e = 10**(-20) #error   
     for i in range(0, Q+1):
         xi0 = cos(((2*i+1)/(2*Q+2))*pi)   # Chebchev points
         
@@ -135,7 +143,7 @@ def Element_matrix(N,Q):
 
 #Element_matrix(N,Q)
 
-def GMM(Ne, intma, N, Q):
+def GMM(Ne, intma, N, Q, ax,bx):
     
     Np = Ne*N+1
     
@@ -175,13 +183,11 @@ def Element_Diff_matrix(N):
 
 # function that compute global residual vector
 
-def Resi(Ne, q, N,Miv):
-    
-    De = Element_Diff_matrix(N)
+def Resi(De, Ne, q, N,Miv,fe):
     
     Np = Ne*N+1
     
-    fe = lambda q: u*q
+    # fe = lambda q: u*q
     
     R = zeros(Np)                 # global residual vector
     
@@ -219,7 +225,7 @@ def Resi(Ne, q, N,Miv):
         
     return GR
 
-def Solver_1DW(N,Ne,M, x,t,dt):
+def Solver_1DW(N,Ne,M, Q,qinit,fe,bc,ax,bx,x,t,dt):
     
     
     #q0 = qinit(x)         # defined initial condition
@@ -232,36 +238,41 @@ def Solver_1DW(N,Ne,M, x,t,dt):
     
     #inverse of global mass matrix
     
-    MM = GMM(Ne, intma, N, Q)
+    MM = GMM(Ne, intma, N, Q, ax,bx)
     
     Miv = linalg.inv(MM)     
 
+    # Donna : How expensive is this?  It is called on every iteration of Resi, but only 
+    # seems to depend on N.  
+    De = Element_Diff_matrix(N)
+        
     # computation of the solution of 1D wave equation
     qn = q0     
 
     for n in range(M):                   # time loop
 
-        K1 = Resi(Ne, qn,N, Miv)
+        K1 = Resi(De, Ne, qn,N, Miv,fe)
 
         # soultion for the wave equation at time n+1
 
         qh = qn + (dt/2)*K1
 
-        K2 = Resi(Ne,qh, N,Miv)
+        K2 = Resi(De, Ne,qh, N,Miv, fe)
         
         Ph = qn + (dt/2)*K2
         
-        K3 = Resi(Ne, Ph, N, Miv)
+        K3 = Resi(De, Ne, Ph, N, Miv,fe)
         
         P = qn + dt*K3
         
-        K4 = Resi(Ne, P, N, Miv)
+        K4 = Resi(De, Ne, P, N, Miv,fe)
         
 
         qn1 = qn + (dt/6)*(K1+2*K2+2*K3+K4) 
 
-        qn1[0] = qinit(ax-u*t[n+1])
-        qn1[-1] = qinit(bx-u*t[n+1])
+        # qn1[0] = qinit(ax-u*t[n+1])
+        # qn1[-1] = qinit(bx-u*t[n+1])
+        qn1[0], qn1[-1] = bc(t[n+1])
         
         qn = qn1
     
