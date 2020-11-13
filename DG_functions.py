@@ -139,6 +139,9 @@ def Element_matrix(N,Q):
 
     Me = (1/2)*Me
 
+    print('Elemental Mass Matrix')
+    print(Me) #print Mass Matrix
+    
     return Me
 
 #Differentiation element matrix
@@ -156,6 +159,9 @@ def Element_Diff_matrix(N,Q):
                 a2, xj = LagrangeBasis(N, j, Xi[k], Xi)
                 De[i,j] = De[i,j]- w[k]*a1*a2
 
+    print('Elemental Differentiation Matrix')
+    print(De) #print Diff Matrix
+                
     return De
 
 #Element flux matrix
@@ -174,6 +180,9 @@ def Element_Flux_matrix(N, Q):
                 
                 Fe[i,j] = x1*x2 - x3*x4
 
+    print('Elemental Flux Matrix')
+    print(Fe) #print Flux Matrix
+                
     return Fe
 
 
